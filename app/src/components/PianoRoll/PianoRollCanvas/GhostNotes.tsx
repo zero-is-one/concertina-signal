@@ -51,6 +51,7 @@ export const GhostNotes: FC<{ zIndex: number; trackId: TrackId }> = observer(
             id: e.id,
             velocity: 127, // draw opaque when ghost
             isSelected: false,
+            colorId: 0,
           }
         }),
       [windowedEvents, transform, track.isRhythmTrack],

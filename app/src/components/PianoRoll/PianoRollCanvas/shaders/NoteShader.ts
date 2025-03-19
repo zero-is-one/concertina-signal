@@ -11,6 +11,7 @@ import { Rect } from "../../../../entities/geometry/Rect"
 export interface INoteData {
   velocity: number
   isSelected: boolean
+  colorId: number
 }
 
 export class NoteBuffer
@@ -33,10 +34,10 @@ export class NoteBuffer
   update(rects: (Rect & INoteData)[]) {
     if (
       this.boundsBuffer.length < rects.length * 4 ||
-      this.stateBuffer.length < rects.length * 2
+      this.stateBuffer.length < rects.length * 3
     ) {
       this.boundsBuffer = new Float32Array(rects.length * 4)
-      this.stateBuffer = new Float32Array(rects.length * 2)
+      this.stateBuffer = new Float32Array(rects.length * 3)
     }
 
     for (let i = 0; i < rects.length; i++) {
@@ -47,8 +48,9 @@ export class NoteBuffer
       this.boundsBuffer[i * 4 + 2] = rect.width
       this.boundsBuffer[i * 4 + 3] = rect.height
 
-      this.stateBuffer[i * 2 + 0] = rect.velocity / 127
-      this.stateBuffer[i * 2 + 1] = rect.isSelected ? 1 : 0
+      this.stateBuffer[i * 3 + 0] = rect.velocity / 127
+      this.stateBuffer[i * 3 + 1] = rect.isSelected ? 1 : 0
+      this.stateBuffer[i * 3 + 2] = rect.colorId
     }
 
     this.vertexArray.updateBuffer(
@@ -57,7 +59,7 @@ export class NoteBuffer
     )
     this.vertexArray.updateBuffer(
       "state",
-      this.stateBuffer.subarray(0, rects.length * 2),
+      this.stateBuffer.subarray(0, rects.length * 3),
     )
 
     this._instanceCount = rects.length
@@ -82,11 +84,11 @@ export const NoteShader = (gl: WebGL2RenderingContext) =>
 
       in vec4 position;
       in vec4 bounds;  // [x, y, width, height]
-      in vec2 state; // [velocity, isSelected]
+      in vec3 state; // [velocity, isSelected, colorId]
 
       out vec4 vBounds;
       out vec2 vPosition;
-      out vec2 vState;
+      out vec3 vState;
 
       void main() {
         vec4 transformedPosition = vec4((position.xy * bounds.zw + bounds.xy), position.zw);
@@ -106,7 +108,7 @@ export const NoteShader = (gl: WebGL2RenderingContext) =>
 
       in vec4 vBounds;
       in vec2 vPosition;
-      in vec2 vState;
+      in vec3 vState;
 
       out vec4 outColor;
 
@@ -121,21 +123,35 @@ export const NoteShader = (gl: WebGL2RenderingContext) =>
         float outlineRight = step(localX, vBounds.z - border);
         
         float isOutline = outlineTop * outlineBottom * outlineLeft * outlineRight;
-    
+
+        vec4 myColor = activeColor;
+
+        if (vState.z >= 1.0) {
+          myColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+          
+        if (vState.z >= 2.0) {
+          myColor = vec4(0.0, 0.0, 1.0, 1.0);
+        } 
+          
+        if (vState.z >= 3.0) {
+          myColor = vec4(0.5, 0.0, 0.5, 1.0);
+        }
+        
         if (isOutline < 1.0) {
           // draw outline
           outColor = strokeColor;
         } else {
           // if selected, draw selected color
           // otherwise, draw color based on velocity by mixing active and inactive color
-          outColor = mix(mix(inactiveColor, activeColor, vState.x), selectedColor, vState.y);
+          outColor = mix(mix(inactiveColor, myColor, vState.x), selectedColor, vState.y);
         }
       }
     `,
     {
       position: { size: 2, type: gl.FLOAT },
       bounds: { size: 4, type: gl.FLOAT, divisor: 1 },
-      state: { size: 2, type: gl.FLOAT, divisor: 1 },
+      state: { size: 3, type: gl.FLOAT, divisor: 1 },
     },
     {
       projectionMatrix: uniformMat4(),

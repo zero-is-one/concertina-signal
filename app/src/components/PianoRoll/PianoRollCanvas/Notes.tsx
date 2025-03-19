@@ -2,9 +2,11 @@ import { useTheme } from "@emotion/react"
 import Color from "color"
 import { observer } from "mobx-react-lite"
 import { FC } from "react"
-import { colorToVec4, enhanceContrast } from "../../../gl/color"
+import { Midi } from "tonal"
+import { getNoteActionType } from "../../../concertina/concertina"
+import { colorToVec4 } from "../../../gl/color"
 import { useStores } from "../../../hooks/useStores"
-import { trackColorToCSSColor } from "../../../track/TrackColor"
+import { NoteEvent } from "../../../track"
 import { NoteCircles } from "./NoteCircles"
 import { NoteRectangles } from "./NoteRectangles"
 
@@ -18,24 +20,39 @@ export const Notes: FC<{ zIndex: number }> = observer(({ zIndex }) => {
     return <></>
   }
 
-  const baseColor = Color(
-    selectedTrack.color !== undefined
-      ? trackColorToCSSColor(selectedTrack.color)
-      : theme.themeColor,
-  )
-  const borderColor = colorToVec4(
-    enhanceContrast(baseColor, theme.isLightContent, 0.3),
-  )
+  const baseColor = Color("yellow")
+  const borderColor = colorToVec4(Color("#292B32"))
   const selectedColor = colorToVec4(baseColor.lighten(0.7))
   const backgroundColor = colorToVec4(Color(theme.backgroundColor))
   const baseColorVec4 = colorToVec4(baseColor)
+
+  const eventNotes = notes.map(
+    (note) => selectedTrack?.getEventById(note.id) as NoteEvent,
+  )
+
+  const notesWithConcertinaColor = notes.map((note, i) => {
+    const colorId = {
+      push: 1,
+      pull: 2,
+      both: 3,
+      undefined: 0,
+    }[
+      getNoteActionType(Midi.midiToNoteName(eventNotes[i].noteNumber)) ||
+        "undefined"
+    ]
+
+    return {
+      ...note,
+      colorId,
+    }
+  })
 
   return (
     <>
       {selectedTrack.isRhythmTrack && (
         <NoteCircles
           strokeColor={borderColor}
-          rects={notes}
+          rects={notesWithConcertinaColor}
           inactiveColor={backgroundColor}
           activeColor={baseColorVec4}
           selectedColor={selectedColor}
@@ -48,7 +65,7 @@ export const Notes: FC<{ zIndex: number }> = observer(({ zIndex }) => {
           inactiveColor={backgroundColor}
           activeColor={baseColorVec4}
           selectedColor={selectedColor}
-          rects={notes}
+          rects={notesWithConcertinaColor}
           zIndex={zIndex + 0.1}
         />
       )}

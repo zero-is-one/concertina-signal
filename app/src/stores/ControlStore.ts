@@ -11,10 +11,15 @@ import {
 } from "../track"
 import PianoRollStore from "./PianoRollStore"
 
-export type ControlMode = { type: "velocity" } | ValueEventType
+export type ControlMode =
+  | { type: "velocity" }
+  | { type: "concertina" }
+  | ValueEventType
 
 export const controlModeKey = (controlMode: ControlMode) => {
   switch (controlMode.type) {
+    case "concertina":
+      return "concertina"
     case "velocity":
       return "velocity"
     case "pitchBend":
@@ -26,11 +31,13 @@ export const controlModeKey = (controlMode: ControlMode) => {
 
 export const isEqualControlMode = (a: ControlMode, b: ControlMode) => {
   switch (a.type) {
+    case "concertina":
     case "velocity":
     case "pitchBend":
       return a.type === b.type
     case "controller":
       switch (b.type) {
+        case "concertina":
         case "velocity":
         case "pitchBend":
           return false
@@ -43,6 +50,9 @@ export const isEqualControlMode = (a: ControlMode, b: ControlMode) => {
 export type SerializedControlStore = Pick<ControlStore, "controlModes">
 
 export const defaultControlModes: ControlMode[] = [
+  {
+    type: "concertina",
+  },
   {
     type: "velocity",
   },
@@ -72,7 +82,7 @@ export const defaultControlModes: ControlMode[] = [
 ]
 
 export class ControlStore {
-  controlMode: ControlMode = { type: "velocity" }
+  controlMode: ControlMode = { type: "concertina" }
   selection: ControlSelection | null = null
   selectedEventIds: number[] = []
 
@@ -117,6 +127,8 @@ export class ControlStore {
   )[] {
     const { controlMode } = this
     switch (controlMode.type) {
+      case "concertina":
+        throw new Error("don't use this method for concertina")
       case "velocity":
         throw new Error("don't use this method for velocity")
       case "pitchBend":

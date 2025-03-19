@@ -6,6 +6,7 @@ import React, { FC, useCallback, useRef } from "react"
 import { Layout } from "../../Constants"
 import { useStores } from "../../hooks/useStores"
 import { ControlMode, isEqualControlMode } from "../../stores/ControlStore"
+import { Concertina } from "./Concertina/Concertina"
 import { ControlName } from "./ControlName"
 import { ValueEventGraph } from "./Graph/ValueEventGraph"
 import PianoVelocityControl from "./VelocityControl/VelocityControl"
@@ -133,6 +134,8 @@ const ControlPane: FC = observer(() => {
     switch (mode.type) {
       case "velocity":
         return <PianoVelocityControl {...controlSize} />
+      case "concertina":
+        return <Concertina {...controlSize} />
       default:
         return <ValueEventGraph {...controlSize} type={mode} />
     }
