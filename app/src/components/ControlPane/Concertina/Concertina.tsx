@@ -3,7 +3,7 @@ import { FC } from "react"
 import { Midi } from "tonal"
 import { instruments, isNoteNameEqual } from "../../../concertina/concertina"
 import { useStores } from "../../../hooks/useStores"
-import { isNoteEvent, NoteEvent } from "../../../track"
+import { isNoteEvent } from "../../../track"
 import { RenderInstrument, Stroke } from "./RenderInstrument"
 
 const instrument = instruments["cg-wheatstone-30"]
@@ -13,6 +13,7 @@ let prevActionType = "push"
 export const Concertina: FC<{ width: number; height: number }> = observer(
   ({ width, height }) => {
     const {
+      song,
       pianoRollStore: {
         selectedTrack,
         transform,
@@ -22,22 +23,38 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
         selectedNoteIds,
         cursorX,
         allNotes,
+        notes,
       },
     } = useStores()
 
-    const notesInOrAtCursor = allNotes.filter((note) => {
-      return note.x <= cursorX && cursorX <= note.x + note.width
-    })
+    const noteInfos = song.tracks
+      .flatMap((track, i) => {
+        //get all notes from all tracks, add trackId to each note
+        return track.events
+          .filter(isNoteEvent)
+          .map((noteEvent) => ({ noteEvent, track: track, trackIndex: i }))
+      })
+      .map((n) => {
+        // get the noteEvent and its rect
+        const rect = transform.getRect(n.noteEvent)
+        return {
+          rect,
+          ...n,
+        }
+      })
+      .filter((noteInfo) => {
+        // filter notes that are at the cursor
+        return (
+          noteInfo.rect.x <= cursorX &&
+          cursorX <= noteInfo.rect.x + noteInfo.rect.width
+        )
+      })
 
-    const notes = notesInOrAtCursor
-      .map((note) => selectedTrack?.getEventById(note.id) as NoteEvent)
-      .filter((note) => isNoteEvent(note))
+    const names = noteInfos.map((note) =>
+      Midi.midiToNoteName(note.noteEvent.noteNumber),
+    )
 
-    console.log({ notes })
-
-    const names = notes.map((note) => Midi.midiToNoteName(note.noteNumber))
-
-    console.log({ cursorX, selectedNoteIds, allNotes, notes, names })
+    console.log({ noteInfos, names, cursorX })
 
     let requiresPull = false
     let requiresPush = false
@@ -57,24 +74,12 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
 
       strokes.push(...pushButtons, ...pullButtons)
 
-      console.log({ name, pushButtons, pullButtons })
-
       if (pushButtons.length > 0 && pullButtons.length === 0) {
         requiresPush = true
       }
       if (pushButtons.length === 0 && pullButtons.length > 0) {
         requiresPull = true
       }
-    })
-
-    console.log({
-      cursorX,
-      selectedNoteIds,
-      allNotes,
-      notes,
-      names,
-      requiresPush,
-      requiresPull,
     })
 
     if (!requiresPull && !requiresPush) {
