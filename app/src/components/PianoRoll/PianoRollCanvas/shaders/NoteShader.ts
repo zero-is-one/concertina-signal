@@ -138,14 +138,27 @@ export const NoteShader = (gl: WebGL2RenderingContext) =>
           myColor = vec4(0.5, 0.0, 0.5, 1.0);
         }
         
+        outColor = strokeColor;
+        outColor = selectedColor;
+        
         if (isOutline < 1.0) {
           // draw outline
-          outColor = strokeColor;
+          outColor = myColor;
         } else {
           // if selected, draw selected color
           // otherwise, draw color based on velocity by mixing active and inactive color
-          outColor = mix(mix(inactiveColor, myColor, vState.x), selectedColor, vState.y);
+          outColor = mix(inactiveColor, myColor, vState.x);
         }
+
+        if (isOutline < 1.0 && vState.y >= 1.0) {
+         outColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+
+        // if y is even, draw white
+        // if (int(vPosition.x) % 4 == 0) {
+        //   outColor = mix(outColor, vec4(1.0, 1.0, 1.0, 1.0), 0.2);
+        // }
+
       }
     `,
     {
