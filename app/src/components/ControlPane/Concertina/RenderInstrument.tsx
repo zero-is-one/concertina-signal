@@ -1,5 +1,9 @@
 import { Fragment } from "react"
-import { Instrument } from "../../../concertina/concertina"
+import {
+  buttonIndexToRowCol,
+  ButtonPosition,
+  Instrument,
+} from "../../../concertina/concertina"
 
 export type Stroke = {
   index: number
@@ -22,6 +26,7 @@ export const RenderInstrument = ({
               btn={btn}
               action={strokes.find((stroke) => stroke.index === i)?.action}
               index={i}
+              position={buttonIndexToRowCol(instrument, i)}
             />
           </Fragment>
         )
@@ -34,10 +39,12 @@ const Button = ({
   btn,
   action,
   index,
+  position,
 }: {
   btn: { x: number; push: string; pull: string }
   action?: "push" | "pull"
   index: number
+  position: ButtonPosition
 }) => {
   return (
     <div
@@ -58,7 +65,9 @@ const Button = ({
       <br />
       {btn.pull}
       <br />
-      {index}
+      <small>
+        {index} - {position.row}, {position.col}
+      </small>
     </div>
   )
 }
