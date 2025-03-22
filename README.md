@@ -1,4 +1,9 @@
-This is a fork of the signal, the online midi editing tool. It adds tool specfically to help with writing concertina music.
+This is a fork of signal, the online MIDI editing tool. It includes additional features specifically designed to assist with composing concertina music:
+
+- **Concertina Instrument Layout:** Visual representation of a concertina instrument layout.
+- **Push and Pull Detection:** Automatically detects whether a note requires a push or pull action based on the concertina layout.
+- **Note Filtering:** Filters notes based on their position relative to the cursor.
+- **Stroke Visualization:** Displays the required strokes (push or pull) for the notes being played.
 
 ## Concepts
 
