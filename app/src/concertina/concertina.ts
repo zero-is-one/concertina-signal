@@ -76,3 +76,31 @@ export const buttonIndexToRowCol = (
 
   throw new Error("Index out of bounds")
 }
+
+export const findClosestButtonAmongSet = (
+  instrument: Instrument,
+  index: number,
+  indices: number[],
+) => {
+  const position = buttonIndexToRowCol(instrument, index)
+  let closestIndex = -1
+  let closestDistance = Infinity
+
+  instrument.layout.forEach((_, i) => {
+    if (!indices.includes(i)) return
+
+    const buttonPosition = buttonIndexToRowCol(instrument, i)
+    const distance =
+      Math.abs(position.row - buttonPosition.row) +
+      Math.abs(position.col - buttonPosition.col) // manhattan distance
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestIndex = i
+    }
+  })
+
+  return {
+    index: closestIndex,
+    distance: closestDistance,
+  }
+}

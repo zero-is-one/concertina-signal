@@ -1,7 +1,10 @@
 import { observer } from "mobx-react-lite"
 import { FC } from "react"
 import { Midi } from "tonal"
-import { isNoteNameEqual } from "../../../concertina/concertina"
+import {
+  findClosestButtonAmongSet,
+  isNoteNameEqual,
+} from "../../../concertina/concertina"
 import { instruments } from "../../../concertina/instruments"
 import { useStores } from "../../../hooks/useStores"
 import { isNoteEvent } from "../../../track"
@@ -100,17 +103,64 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
       (stroke) => stroke.action === desiredAction || !desiredAction,
     )
 
-    prevDesiredAction = desiredAction
+    // if a note is repeated, keep the button that is farthest from any other button
+    namesInRange.forEach((name) => {
+      if (!canBePlayed) return
 
-    console.log({
-      names,
-      namesInRange,
-      canBePlayedWithAllPush,
-      canBePlayedWithAllPull,
-      canBePlayedWithBoth,
-      desiredAction,
-      strokes,
+      // what are the repeated buttons on the instrument
+      const repeatedButtons = strokes.filter((stroke) => {
+        return isNoteNameEqual(
+          instrument.layout[stroke.index][stroke.action],
+          name,
+        )
+      })
+
+      if (repeatedButtons.length <= 1) return // no repeats
+
+      const closestButtonsMap = repeatedButtons.map((button) => {
+        return {
+          button,
+          closestButton: findClosestButtonAmongSet(
+            instrument,
+            button.index,
+            strokes
+              .map((b) => b.index)
+              .filter((i) => !repeatedButtons.map((b) => b.index).includes(i)),
+          ),
+        }
+      })
+
+      //select the button that is farthest from any button
+      const farthestButton = closestButtonsMap.reduce((acc, curr) => {
+        return acc.closestButton.distance > curr.closestButton.distance
+          ? acc
+          : curr
+      })
+
+      // keep the farthest button and remove the rest
+      const buttonsToRemove = repeatedButtons.filter(
+        (button) => button.index !== farthestButton.button.index,
+      )
+
+      buttonsToRemove.forEach((button) => {
+        const index = strokes.findIndex(
+          (stroke) => stroke.index === button.index,
+        )
+        strokes.splice(index, 1)
+      })
     })
+
+    prevDesiredAction = desiredAction || "push"
+
+    // console.log({
+    //   names,
+    //   namesInRange,
+    //   canBePlayedWithAllPush,
+    //   canBePlayedWithAllPull,
+    //   canBePlayedWithBoth,
+    //   desiredAction,
+    //   strokes,
+    // })
 
     return (
       <div>
