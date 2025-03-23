@@ -48,7 +48,8 @@ export class NoteBuffer
       this.boundsBuffer[i * 4 + 2] = rect.width
       this.boundsBuffer[i * 4 + 3] = rect.height
 
-      this.stateBuffer[i * 3 + 0] = rect.velocity / 127
+      this.stateBuffer[i * 3 + 0] =
+        rect.velocity === 126 ? 0.99 : rect.velocity / 127
       this.stateBuffer[i * 3 + 1] = rect.isSelected ? 1 : 0
       this.stateBuffer[i * 3 + 2] = rect.colorId
     }
@@ -150,14 +151,26 @@ export const NoteShader = (gl: WebGL2RenderingContext) =>
           outColor = mix(inactiveColor, myColor, vState.x);
         }
 
+
+        if (vState.x == 0.99) {
+          outColor = vec4(0.3, 0.2, 0.2, 0.5);
+          //stripes
+          if (int(vPosition.x) % 4 == 0) {
+            outColor = mix(outColor, vec4(1.0, 1.0, 1.0, 1.0), 0.1);
+          }
+
+        }
+
+        if (isOutline < 1.0) {
+          outColor = myColor;
+        }
+
         if (isOutline < 1.0 && vState.y >= 1.0) {
          outColor = vec4(1.0, 1.0, 1.0, 1.0);
         }
 
-        // if y is even, draw white
-        // if (int(vPosition.x) % 4 == 0) {
-        //   outColor = mix(outColor, vec4(1.0, 1.0, 1.0, 1.0), 0.2);
-        // }
+
+
 
       }
     `,

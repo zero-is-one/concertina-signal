@@ -3,6 +3,8 @@ import Color from "color"
 import { vec4 } from "gl-matrix"
 import { observer } from "mobx-react-lite"
 import { FC, useMemo } from "react"
+import { Midi } from "tonal"
+import { getNoteActionType } from "../../../concertina/concertina"
 import { Range } from "../../../entities/geometry/Range"
 import { colorToVec4 } from "../../../gl/color"
 import { isEventOverlapRange } from "../../../helpers/filterEvents"
@@ -46,12 +48,20 @@ export const GhostNotes: FC<{ zIndex: number; trackId: TrackId }> = observer(
           const rect = track.isRhythmTrack
             ? transform.getDrumRect(e)
             : transform.getRect(e)
+
+          const colorId = {
+            push: 1,
+            pull: 2,
+            both: 3,
+            undefined: 0,
+          }[getNoteActionType(Midi.midiToNoteName(e.noteNumber)) || "undefined"]
+
           return {
             ...rect,
             id: e.id,
-            velocity: 127, // draw opaque when ghost
+            velocity: 126, // draw opaque when ghost
             isSelected: false,
-            colorId: 0,
+            colorId,
           }
         }),
       [windowedEvents, transform, track.isRhythmTrack],
