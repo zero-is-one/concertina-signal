@@ -1,24 +1,6 @@
 import { Midi } from "tonal"
 import { instruments } from "./instruments"
-
-export type Button = {
-  push: string
-  pull: string
-  x: number
-  newRow: boolean
-}
-
-export type Instrument = {
-  title: string
-  layout: Button[]
-}
-
-type InstrumentId = keyof typeof instruments
-
-export type ButtonPosition = {
-  row: number
-  col: number
-}
+import { ButtonPosition, Instrument, InstrumentId } from "./types"
 
 export const getNoteActionType = (
   note: string,

@@ -44,6 +44,7 @@
   ],
   "packageManager": "npm@10.9.0",
   "dependencies": {
+    "abcjs": "^6.4.4",
     "tonal": "^6.4.1"
   }
 }

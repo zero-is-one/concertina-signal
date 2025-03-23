@@ -8,6 +8,7 @@ import {
 import { instruments } from "../../../concertina/instruments"
 import { useStores } from "../../../hooks/useStores"
 import { isNoteEvent } from "../../../track"
+import { RenderCooverNotation } from "./RenderCooverNotation"
 import { RenderInstrument, Stroke } from "./RenderInstrument"
 
 const instrument = instruments["cg-wheatstone-30"]
@@ -152,26 +153,64 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
 
     prevDesiredAction = desiredAction || "push"
 
-    // console.log({
-    //   names,
-    //   namesInRange,
-    //   canBePlayedWithAllPush,
-    //   canBePlayedWithAllPull,
-    //   canBePlayedWithBoth,
-    //   desiredAction,
-    //   strokes,
-    // })
+    // get the lowest track that is not a conductor
+    const melodyTrackIndex = song.tracks.findIndex(
+      (track) => track.isConductorTrack === false,
+    )
+
+    // const mainStroke = song.tracks[0]
+    // //.events.filter(isNoteEvent)
+    // // .map((noteEvent) => {
+    // //   const rect = transform.getRect(noteEvent)
+    // //   return {
+    // //     rect,
+    // //     noteEvent,
+    // //   }
+    // // })
+    // // .find((noteInfo) => {
+    // //   return (
+    // //     noteInfo.rect.x <= cursorX &&
+    // //     cursorX <= noteInfo.rect.x + noteInfo.rect.width
+    // //   )
+    // // })
+
+    // get the noteInfo of the note with the lowest trackIndex
+    const mainNoteInfo = noteInfos.find(
+      (noteInfo) => noteInfo.trackIndex === melodyTrackIndex,
+    )
+
+    const mainStrokeForCoover = strokes.find((stroke) => {
+      return (
+        mainNoteInfo &&
+        isNoteNameEqual(
+          instrument.layout[stroke.index][stroke.action],
+          Midi.midiToNoteName(mainNoteInfo.noteEvent.noteNumber),
+        )
+      )
+    })
 
     return (
-      <div>
+      <div
+        style={{
+          display: "flex",
+        }}
+      >
         <RenderInstrument instrument={instrument} strokes={strokes} />
-        {names.join(",")}
-        <br />
-        {!canBePlayed && <b style={{ color: "red" }}>cant be played</b>}
-        <br />
-        {canBePlayedWithAllPush ? "can be played with all push" : ""}
-        <br />
-        {canBePlayedWithAllPull ? "can be played with all pull" : ""}
+        <RenderCooverNotation
+          mainStroke={mainStrokeForCoover}
+          strokes={strokes}
+          instrument={instrument}
+        />
+
+        <div>
+          {names.join(",")}
+          <br />
+          {!canBePlayed && <b style={{ color: "red" }}>cant be played</b>}
+          <br />
+          {canBePlayedWithAllPush ? "can be played with all push" : ""}
+          <br />
+          {canBePlayedWithAllPull ? "can be played with all pull" : ""}
+        </div>
       </div>
     )
   },
