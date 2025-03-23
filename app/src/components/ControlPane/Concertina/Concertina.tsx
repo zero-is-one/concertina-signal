@@ -9,7 +9,7 @@ import { RenderInstrument, Stroke } from "./RenderInstrument"
 
 const instrument = instruments["cg-wheatstone-30"]
 
-let prevActionType = "push"
+let prevDesiredAction: Stroke["action"] | null = "push"
 
 export const Concertina: FC<{ width: number; height: number }> = observer(
   ({ width, height }) => {
@@ -55,57 +55,73 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
       Midi.midiToNoteName(note.noteEvent.noteNumber),
     )
 
-    console.log({ noteInfos, names, cursorX })
-
-    let requiresPull = false
-    let requiresPush = false
-    let strokes: Stroke[] = []
-
-    names.forEach((name) => {
-      const pushButtons: Stroke[] = []
-      const pullButtons: Stroke[] = []
-
-      instrument.layout.forEach((btn, i) => {
-        if (isNoteNameEqual(btn.push, name)) {
-          pushButtons.push({ index: i, action: "push" })
-        } else if (isNoteNameEqual(btn.pull, name)) {
-          pullButtons.push({ index: i, action: "pull" })
-        }
+    const namesInRange = names.filter((name) => {
+      return instrument.layout.some((btn) => {
+        return (
+          isNoteNameEqual(btn.push, name) || isNoteNameEqual(btn.pull, name)
+        )
       })
-
-      strokes.push(...pushButtons, ...pullButtons)
-
-      if (pushButtons.length > 0 && pullButtons.length === 0) {
-        requiresPush = true
-      }
-      if (pushButtons.length === 0 && pullButtons.length > 0) {
-        requiresPull = true
-      }
     })
 
-    if (!requiresPull && !requiresPush) {
-      requiresPush = prevActionType === "push"
-      requiresPull = prevActionType === "pull"
-    }
+    const canBePlayedWithAllPush = namesInRange.every((name) =>
+      instrument.layout.some((btn) => isNoteNameEqual(btn.push, name)),
+    )
 
-    if (!requiresPush && requiresPull) {
-      strokes = strokes.filter((stroke) => stroke.action !== "push")
-      prevActionType = "pull"
-    }
+    const canBePlayedWithAllPull = namesInRange.every((name) =>
+      instrument.layout.some((btn) => isNoteNameEqual(btn.pull, name)),
+    )
 
-    if (!requiresPull && requiresPush) {
-      strokes = strokes.filter((stroke) => stroke.action !== "pull")
-      prevActionType = "push"
-    }
+    const canBePlayed = canBePlayedWithAllPush || canBePlayedWithAllPull
+    const canBePlayedWithBoth = canBePlayedWithAllPush && canBePlayedWithAllPull
+
+    const desiredAction = !canBePlayed
+      ? null
+      : canBePlayedWithBoth
+        ? prevDesiredAction
+        : canBePlayedWithAllPush
+          ? "push"
+          : "pull"
+
+    const possibleStrokes: Stroke[] = names
+      .map((name) => {
+        return instrument.layout.map((btn, i) => [
+          isNoteNameEqual(btn.push, name)
+            ? { index: i, action: "push" as const }
+            : null,
+          isNoteNameEqual(btn.pull, name)
+            ? { index: i, action: "pull" as const }
+            : null,
+        ])
+      })
+      .flat(2)
+      .filter((stroke) => stroke !== null)
+
+    const strokes = possibleStrokes.filter(
+      (stroke) => stroke.action === desiredAction || !desiredAction,
+    )
+
+    prevDesiredAction = desiredAction
+
+    console.log({
+      names,
+      namesInRange,
+      canBePlayedWithAllPush,
+      canBePlayedWithAllPull,
+      canBePlayedWithBoth,
+      desiredAction,
+      strokes,
+    })
 
     return (
       <div>
         <RenderInstrument instrument={instrument} strokes={strokes} />
         {names.join(",")}
         <br />
-        dd
-        {requiresPull && "requires pull"}
-        {requiresPush && "requires push"}
+        {!canBePlayed && <b style={{ color: "red" }}>cant be played</b>}
+        <br />
+        {canBePlayedWithAllPush ? "can be played with all push" : ""}
+        <br />
+        {canBePlayedWithAllPull ? "can be played with all pull" : ""}
       </div>
     )
   },
