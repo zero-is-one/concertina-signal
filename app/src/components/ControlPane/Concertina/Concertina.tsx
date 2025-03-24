@@ -189,18 +189,44 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
       )
     })
 
+    const selectedNoteInfos = noteInfos.filter((noteInfo) => {
+      return selectedNoteIds.includes(noteInfo.noteEvent.id)
+    })
+
+    const highlightStrokes = selectedNoteInfos
+      .map((noteInfo) => {
+        return strokes.find((stroke) => {
+          return isNoteNameEqual(
+            instrument.layout[stroke.index][stroke.action],
+            Midi.midiToNoteName(noteInfo.noteEvent.noteNumber),
+          )
+        })
+      })
+      .filter((stroke) => stroke !== undefined) as Stroke[]
+
     return (
       <div
         style={{
           display: "flex",
         }}
       >
-        <RenderInstrument instrument={instrument} strokes={strokes} />
-        <RenderCooverNotation
-          mainStroke={mainStrokeForCoover}
-          strokes={strokes}
+        <RenderInstrument
           instrument={instrument}
+          strokes={strokes}
+          highlightStrokes={highlightStrokes}
         />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <RenderCooverNotation
+            mainStroke={mainStrokeForCoover}
+            strokes={strokes}
+            instrument={instrument}
+          />
+        </div>
 
         <div>
           {names.join(",")}
