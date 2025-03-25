@@ -57,7 +57,7 @@ export default class PianoRollStore {
   private readonly tickScrollStore: TickScrollStore
 
   scrollLeftTicks = 0
-  scrollTopKeys = 70 // 中央くらいの音程にスクロールしておく
+  scrollTopKeys = 85 // 中央くらいの音程にスクロールしておく
   SCALE_Y_MIN = 0.5
   SCALE_Y_MAX = 4
   notesCursor = "auto"
