@@ -193,7 +193,7 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
       return selectedNoteIds.includes(noteInfo.noteEvent.id)
     })
 
-    const highlightStrokes = selectedNoteInfos
+    const selectStrokes = selectedNoteInfos
       .map((noteInfo) => {
         return strokes.find((stroke) => {
           return isNoteNameEqual(
@@ -210,15 +210,52 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
           display: "flex",
         }}
       >
-        <RenderInstrument
-          instrument={instrument}
-          strokes={strokes}
-          highlightStrokes={highlightStrokes}
-        />
+        {" "}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <RenderInstrument
+            instrument={instrument}
+            strokes={strokes}
+            selectStrokes={selectStrokes}
+          />
+          <div style={{ height: 30 }}>
+            {strokes.length > 0 && (
+              <span
+                style={{
+                  fontSize: "1.5em",
+                  fontWeight: "bold",
+                }}
+              >
+                {desiredAction === "push" && "⇛⇚"}
+                {desiredAction === "pull" && "⇚ ⇛"}{" "}
+                {desiredAction?.toUpperCase() || ""}
+              </span>
+            )}
+
+            {!canBePlayed && (
+              <span
+                style={{
+                  fontSize: "1.5em",
+                  fontWeight: "bold",
+                  color: "red",
+                }}
+              >
+                ⊘ can't be played. Both pull and push.
+              </span>
+            )}
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 260,
           }}
         >
           <RenderCooverNotation
@@ -226,16 +263,6 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
             strokes={strokes}
             instrument={instrument}
           />
-        </div>
-
-        <div>
-          {names.join(",")}
-          <br />
-          {!canBePlayed && <b style={{ color: "red" }}>cant be played</b>}
-          <br />
-          {canBePlayedWithAllPush ? "can be played with all push" : ""}
-          <br />
-          {canBePlayedWithAllPull ? "can be played with all pull" : ""}
         </div>
       </div>
     )

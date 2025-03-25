@@ -13,11 +13,11 @@ export type Stroke = {
 export const RenderInstrument = ({
   instrument,
   strokes = [],
-  highlightStrokes = [],
+  selectStrokes = [],
 }: {
   instrument: Instrument
   strokes?: Stroke[]
-  highlightStrokes?: Stroke[]
+  selectStrokes?: Stroke[]
 }) => {
   return (
     <div
@@ -35,9 +35,7 @@ export const RenderInstrument = ({
               index={i}
               position={buttonIndexToRowCol(instrument, i)}
               cooverNotationId={instrument.layout[i]?.cooverNotationId}
-              highlight={
-                !!highlightStrokes.find((stroke) => stroke.index === i)
-              }
+              highlight={!!selectStrokes.find((stroke) => stroke.index === i)}
             />
           </Fragment>
         )
@@ -73,7 +71,7 @@ position: ${position.row}, ${position.col}`}
         textAlign: "center",
         marginLeft: btn.x,
         verticalAlign: "bottom",
-        backgroundColor: "#3E3E3E",
+        backgroundColor: "#5c5c5c",
         color: "black",
         position: "relative",
         borderRadius: 99,
@@ -100,7 +98,7 @@ position: ${position.row}, ${position.col}`}
           height: "50%",
           background: action === "push" ? "#fda2b8" : "transparent",
           verticalAlign: "bottom",
-          boxShadow: "inset 0px -2px 0px 0px #292828",
+          boxShadow: "inset 0px -2px 0px 0px #3E3D3D",
         }}
       >
         {btn.push.replace(/[^a-zA-Z#]/g, "")}
