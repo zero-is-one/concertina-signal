@@ -1,5 +1,5 @@
 {
-  "name": "signal",
+  "name": "concertina-signal",
   "version": "0.0.1",
   "description": "A friendly music sequencer application for OS X and Windows.",
   "scripts": {
@@ -19,7 +19,8 @@
     "package:electron": "npm run build:electron && npm run package --prefix electron",
     "make:electron": "npm run build:electron && npm run make:mas --prefix electron",
     "make:darwin": "npm run build:electron && npm run make:darwin --prefix electron",
-    "make:win": "npm run build:electron && npm run make:win --prefix electron"
+    "make:win": "npm run build:electron && npm run make:win --prefix electron",
+    "deploy:github": "bash deploy-github.sh"
   },
   "repository": {
     "type": "git",
