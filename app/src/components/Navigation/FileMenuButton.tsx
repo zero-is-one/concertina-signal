@@ -1,6 +1,5 @@
 import { useTheme } from "@emotion/react"
 import ChevronRight from "mdi-react/ChevronRightIcon"
-import CloudOutlined from "mdi-react/CloudOutlineIcon"
 import KeyboardArrowDown from "mdi-react/KeyboardArrowDownIcon"
 import { observer } from "mobx-react-lite"
 import { FC, useCallback, useRef } from "react"
@@ -58,21 +57,6 @@ export const FileMenuButton: FC = observer(() => {
       {user === null && !hasFSAccess && <LegacyFileMenu close={handleClose} />}
 
       {user && <CloudFileMenu close={handleClose} />}
-
-      {user === null && (
-        <>
-          <MenuDivider />
-          <MenuItem
-            onClick={() => {
-              handleClose()
-              rootViewStore.openSignInDialog = true
-            }}
-          >
-            <CloudOutlined style={{ marginRight: "0.5em" }} />
-            <Localized name="please-sign-up" />
-          </MenuItem>
-        </>
-      )}
 
       <MenuDivider />
 
