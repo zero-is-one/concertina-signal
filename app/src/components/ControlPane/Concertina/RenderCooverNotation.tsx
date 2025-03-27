@@ -23,18 +23,27 @@ export const RenderCooverNotation = ({
       (stroke) =>
         instrument.layout[stroke.index].cooverNotationId?.hand === "left",
     )
-    .map((stroke) => instrument.layout[stroke.index].cooverNotationId?.id)
+    .map((stroke) => instrument.layout[stroke.index].cooverNotationId?.id || "")
+    .sort(cooverIdSortFn)
 
   const rightHandCooverIds = strokes
     .filter(
       (stroke) =>
         instrument.layout[stroke.index].cooverNotationId?.hand === "right",
     )
-    .map((stroke) => instrument.layout[stroke.index].cooverNotationId?.id)
+    .map((stroke) => instrument.layout[stroke.index].cooverNotationId?.id || "")
+    .sort(cooverIdSortFn)
 
   const abc = `X: 1
   |:"^\\n${rightHandCooverIds.join("\\n")}""_${leftHandCooverIds.join("\\n")}"${abcNote}2
   `
 
   return <RenderAbc abc={abc} />
+}
+
+const cooverIdSortFn = (a: string, b: string) => {
+  const aId = isNaN(Number(a)) ? "-" + parseInt(a) : a
+  const bId = isNaN(Number(b)) ? "-" + parseInt(b) : b
+
+  return Number(aId) - Number(bId)
 }
