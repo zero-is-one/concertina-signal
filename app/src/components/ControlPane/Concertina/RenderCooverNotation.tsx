@@ -34,8 +34,14 @@ export const RenderCooverNotation = ({
     .map((stroke) => instrument.layout[stroke.index].cooverNotationId?.id || "")
     .sort(cooverIdSortFn)
 
+  const hasPull = strokes.some((stroke) => stroke.action === "pull")
+
+  const rightHandCooverIdsWithAction = !hasPull
+    ? rightHandCooverIds
+    : ["—", ...rightHandCooverIds]
+
   const abc = `X: 1
-  |:"^\\n${rightHandCooverIds.join("\\n")}""_${leftHandCooverIds.join("\\n")}"${abcNote}2
+  |:"^\\n${rightHandCooverIdsWithAction.join("\\n")}""_${leftHandCooverIds.join("\\n")}"${abcNote}2
   `
 
   return <RenderAbc abc={abc} />
