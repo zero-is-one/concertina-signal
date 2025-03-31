@@ -1,0 +1,1 @@
+{"version":3,"file":"MidiEventFactory.js","sourceRoot":"","sources":["../src/MidiEventFactory.ts"],"names":[],"mappings":"AAEA,MAAM,UAAU,mBAAmB,CACjC,SAAiB,EACjB,OAAe,EACf,cAAsB,EACtB,KAAa;IAEb,OAAO;QACL,SAAS;QACT,IAAI,EAAE,SAAS;QACf,OAAO,EAAE,YAAY;QACrB,OAAO;QACP,cAAc;QACd,KAAK;KACN,CAAA;AACH,CAAC"}
