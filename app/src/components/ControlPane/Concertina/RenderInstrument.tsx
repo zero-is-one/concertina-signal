@@ -22,6 +22,7 @@ export const RenderInstrument = ({
   return (
     <div
       style={{
+        padding: 20,
         whiteSpace: "nowrap",
       }}
     >
