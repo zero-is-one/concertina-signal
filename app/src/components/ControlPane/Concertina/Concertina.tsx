@@ -1,10 +1,7 @@
 import { observer } from "mobx-react-lite"
 import { FC } from "react"
 import { Midi } from "tonal"
-import {
-  findClosestButtonAmongSet,
-  isNoteNameEqual,
-} from "../../../concertina/concertina"
+import { isNoteNameEqual } from "../../../concertina/concertina"
 import { instruments } from "../../../concertina/instruments"
 import { useStores } from "../../../hooks/useStores"
 import { isNoteEvent } from "../../../track"
@@ -105,51 +102,26 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
     )
 
     // if a note is repeated, keep the button that is farthest from any other button
-    namesInRange.forEach((name) => {
-      if (!canBePlayed) return
+    const repeatedStrokes = namesInRange
+      .map((name) => {
+        if (!canBePlayed) return
 
-      // what are the repeated buttons on the instrument
-      const repeatedButtons = strokes.filter((stroke) => {
-        return isNoteNameEqual(
-          instrument.layout[stroke.index][stroke.action],
-          name,
-        )
+        // what are the repeated buttons on the instrument
+        const repeatedButtons = strokes.filter((stroke) => {
+          return isNoteNameEqual(
+            instrument.layout[stroke.index][stroke.action],
+            name,
+          )
+        })
+
+        if (repeatedButtons.length <= 1) return
+
+        return repeatedButtons
       })
+      .filter((x) => x !== undefined)
+      .flat(1)
 
-      if (repeatedButtons.length <= 1) return // no repeats
-
-      const closestButtonsMap = repeatedButtons.map((button) => {
-        return {
-          button,
-          closestButton: findClosestButtonAmongSet(
-            instrument,
-            button.index,
-            strokes
-              .map((b) => b.index)
-              .filter((i) => !repeatedButtons.map((b) => b.index).includes(i)),
-          ),
-        }
-      })
-
-      //select the button that is farthest from any button
-      const farthestButton = closestButtonsMap.reduce((acc, curr) => {
-        return acc.closestButton.distance > curr.closestButton.distance
-          ? acc
-          : curr
-      })
-
-      // keep the farthest button and remove the rest
-      const buttonsToRemove = repeatedButtons.filter(
-        (button) => button.index !== farthestButton.button.index,
-      )
-
-      buttonsToRemove.forEach((button) => {
-        const index = strokes.findIndex(
-          (stroke) => stroke.index === button.index,
-        )
-        strokes.splice(index, 1)
-      })
-    })
+    console.log({ repeatedStrokes })
 
     prevDesiredAction = desiredAction || "push"
 
@@ -223,6 +195,7 @@ export const Concertina: FC<{ width: number; height: number }> = observer(
             instrument={instrument}
             strokes={strokes}
             selectStrokes={selectStrokes}
+            repeatedStrokes={repeatedStrokes}
           />
           <div style={{ height: 30 }}>
             {strokes.length > 0 && (

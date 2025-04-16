@@ -14,10 +14,12 @@ export const RenderInstrument = ({
   instrument,
   strokes = [],
   selectStrokes = [],
+  repeatedStrokes = [],
 }: {
   instrument: Instrument
   strokes?: Stroke[]
   selectStrokes?: Stroke[]
+  repeatedStrokes?: Stroke[]
 }) => {
   return (
     <div
@@ -37,6 +39,7 @@ export const RenderInstrument = ({
               position={buttonIndexToRowCol(instrument, i)}
               cooverNotationId={instrument.layout[i]?.cooverNotationId}
               highlight={!!selectStrokes.find((stroke) => stroke.index === i)}
+              starred={!!repeatedStrokes.find((stroke) => stroke.index === i)}
             />
           </Fragment>
         )
@@ -52,6 +55,7 @@ const Button = ({
   position,
   cooverNotationId,
   highlight,
+  starred,
 }: {
   btn: { x: number; push: string; pull: string }
   action?: "push" | "pull"
@@ -59,6 +63,7 @@ const Button = ({
   position: ButtonPosition
   cooverNotationId: CooverNotationId | undefined
   highlight: boolean
+  starred: boolean
 }) => {
   return (
     <div
@@ -102,6 +107,9 @@ position: ${position.row}, ${position.col}`}
           boxShadow: "inset 0px -2px 0px 0px #3E3D3D",
         }}
       >
+        {starred && action === "push" && (
+          <span style={{ color: "#C04800" }}>*</span>
+        )}
         {btn.push.replace(/[^a-zA-Z#]/g, "")}
         <span
           style={{
@@ -123,6 +131,9 @@ position: ${position.row}, ${position.col}`}
           background: action === "pull" ? "#83aae0" : "transparent",
         }}
       >
+        {starred && action === "pull" && (
+          <span style={{ color: "#C04800" }}>*</span>
+        )}
         {btn.pull.replace(/[^a-zA-Z#]/g, "")}
         <span
           style={{
