@@ -1,8 +1,0 @@
-
-> @signal-app/community@0.0.1 build
-> npm run copy-assets && tsc
-
-
-> @signal-app/community@0.0.1 copy-assets
-> copyfiles -u 1 src/**/*.svg dist/
-

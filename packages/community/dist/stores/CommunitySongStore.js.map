@@ -1,1 +1,0 @@
-{"version":3,"file":"CommunitySongStore.js","sourceRoot":"","sources":["../../src/stores/CommunitySongStore.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,UAAU,EAAE,MAAM,MAAM,CAAA;AAEjD,MAAM,OAAO,kBAAkB;IAC7B,KAAK,GAAgB,EAAE,CAAA;IAEvB;QACE,cAAc,CAAC,IAAI,EAAE;YACnB,KAAK,EAAE,UAAU;SAClB,CAAC,CAAA;IACJ,CAAC;CACF"}
