@@ -19,9 +19,7 @@ echo "- Removing unused files"
 git rm -rf . 
 
 echo "- Removing node_modules, app, and .turbo"
-rm -rf node_modules
-rm -rf app
-rm -rf .turbo
+rm -rf node_modules && rm -rf app && rm -rf .turbo
 
 # Rename edit.html to index.html
 mv dist/edit.html dist/index.html
